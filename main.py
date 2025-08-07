@@ -2,6 +2,7 @@ import time
 
 from loguru import logger
 
+from common import DataAnalyzer
 from source.api import StravaAPI
 from source.database import DataBaseEditor
 from source.token_manager import TokenManager
@@ -28,6 +29,8 @@ def main():
             stream = api.get_activity_streams(act["id"])
             db.add_activity_to_db(act, stream)
 
+    data = db.read_data_in_time_range(start_date, end_date)
+    data_analyzer = DataAnalyzer(data)
 
 if __name__ == "__main__":
     main()
