@@ -2,7 +2,7 @@ import time
 import requests
 from loguru import logger
 from datetime import datetime
-from token_manager import TokenManager
+from source.token_manager import TokenManager
 from typing import Optional, Union, List
 
 ACTIVITIES_URL = "https://www.strava.com/api/v3/athlete/activities"
@@ -43,7 +43,7 @@ class StravaAPI:
             if isinstance(activity_types, str):
                 activity_types = [activity_types]
 
-            filtered_activities =  [a for a in activities if a.get("type") in activity_types]
+            filtered_activities =  [a for a in activities if a.get("sport_type") in activity_types]
             logger.info(f"Filtered {len(filtered_activities)} activities of type(s): {activity_types}")
             return filtered_activities
         else:

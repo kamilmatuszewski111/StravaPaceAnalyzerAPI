@@ -19,6 +19,7 @@ class TokenManager:
     def _load_tokens(self):
         try:
             logger.info("Loading tokens...")
+            load_dotenv(dotenv_path=self.env_file, override=True)
             return {
                 "CLIENT_ID": int(os.getenv("CLIENT_ID")),
                 "CLIENT_SECRET": os.getenv("CLIENT_SECRET"),

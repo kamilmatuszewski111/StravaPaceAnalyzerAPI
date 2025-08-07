@@ -1,2 +1,5 @@
 .env
 *.env
+/identifier.sqlite
+/db_files/trainings.db-journal
+/db_files/trainings.db
