@@ -1,5 +1,6 @@
 import json
 import sqlite3
+from datetime import datetime
 from typing import Union
 
 from loguru import logger
@@ -8,6 +9,7 @@ import os
 from source.common import time_converter_from_iso
 
 db_path = os.path.join(os.getcwd(), "db_files", "trainings.db")
+
 
 class DataBaseEditor:
     def __init__(self, path=None):
@@ -37,14 +39,20 @@ class DataBaseEditor:
            Returns:
                bool: True if the record exists, False otherwise.
            """
-        self.cursor.execute("SELECT 1 FROM trainings WHERE activity_id = ?", (activity_id,))
-        is_exists = bool(self.cursor.fetchone())
-        logger.info(f"Activity with id {activity_id} already exists in the 'trainings' database. Fetching skipped.") \
-            if is_exists else None
-        return is_exists
+        try:
+            self.cursor.execute("SELECT 1 FROM trainings WHERE activity_id = ?", (activity_id,))
+            is_exists = bool(self.cursor.fetchone())
+            if is_exists:
+                logger.info(f"Activity with id {activity_id} already exists in database. Fetching skipped.")
+            return is_exists
+        except sqlite3.OperationalError as e:
+            if "no such table" in str(e):
+                logger.error("The 'trainings' table does not exist.")
+                return False
+            else:
+                raise
 
-
-    def add_activity_to_db(self, activity, data) -> None:
+    def add_activity_to_db(self, activity, data) -> bool:
         """
         Inserts a new activity record into the 'trainings' table in the database.
 
@@ -55,6 +63,10 @@ class DataBaseEditor:
 
         Commits the transaction after insertion. Logs a success message if the insert was successful,
         otherwise logs a warning.
+
+        Returns:
+            bool: True if the activity was successfully inserted into the database,
+                  False if the insertion failed.
         """
         self.cursor.execute("INSERT INTO trainings "
                             "(activity_id, "
@@ -66,16 +78,22 @@ class DataBaseEditor:
                              activity['sport_type'], activity['average_heartrate'], activity['average_speed'],
                              json.dumps(data)))
         self.conn.commit()
-        logger.success("Successfully added activity to database.") if self.cursor.lastrowid is not None else (
-            logger.warning("Activity not added to database."))
+        if self.cursor.lastrowid is not None:
+            logger.success("Successfully added activity to database.")
+            return True
+        else:
+            logger.warning("Activity not added to database.")
+            return False
 
-
-    def clear_whole_database(self) -> None:
+    def clear_whole_database(self) -> bool:
         """
         Prompts the user for confirmation and deletes the entire 'trainings' table from the database if confirmed.
 
         This action is irreversible and will permanently remove all data from the 'trainings' table.
         Asks the user to confirm by typing 'y'. Logs a warning before deletion and logs success after completion.
+
+        Returns:
+        bool: True if the table was deleted, False if the deletion was cancelled.
         """
         logger.warning("Deleting database.")
         decision = input("Would you like to delete all records? (y/n) ")
@@ -83,19 +101,37 @@ class DataBaseEditor:
             self.cursor.execute("DROP TABLE IF EXISTS trainings")
             self.conn.commit()
             logger.success("Successfully deleted all records.")
+            return True
+        else:
+            logger.warning("Deletion aborted.")
+            return False
 
-
-    def read_data_in_time_range(self, start_date, end_date) -> Union[list, None]:
+    def read_data_in_time_range(self, start_date: str, end_date: str) -> Union[list, None]:
         """
         Retrieves all training records from the database that fall within the specified date range.
 
         Args:
-            start_date (str): The start date in the format 'YYYY-MM-DD'.
-            end_date (str): The end date in the format 'YYYY-MM-DD'.
+            start (str): The start date in the format 'YYYY-MM-DD'.
+            end (str): The end date in the format 'YYYY-MM-DD'.
 
         Returns:
             list: A list of tuples, each representing a training record within the given time range.
         """
-        self.cursor.execute("SELECT * FROM trainings WHERE start_date BETWEEN ? AND ?",
-                            (start_date + " 00:00:00", end_date + " 23:59:59"))
-        return self.cursor.fetchall()
+        if start_date == end_date:
+            logger.info("Please enter dates with at least two days in range.")
+            return []
+        start_date += " 00:00:00"
+        end_date += " 23:59:59"
+        try:
+            datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+            datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+            self.cursor.execute("SELECT * FROM trainings WHERE start_date BETWEEN ? AND ?", (start_date, end_date))
+            data = self.cursor.fetchall()
+            if data:
+                return data
+            else:
+                logger.info("Thera are no records within the time range.")
+                return []
+        except ValueError:
+            logger.error("Invalid start and/or end date.")
+            return []

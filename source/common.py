@@ -6,6 +6,8 @@ def time_converter_from_iso(date_time):
 
 class DataAnalyzer:
     def __init__(self, data):
+        if not data:
+            raise ValueError("Cannot perform analyzing on empty data.")
         self.data = data
 
     def extract_list_of_data(self):
