@@ -14,7 +14,7 @@ db_path = os.path.join(os.getcwd(), "db_files", "trainings.db")
 class DataBaseEditor:
     def __init__(self, path=None):
         if path is None:
-            path = os.path.join(os.getcwd(), "db_files", "trainings.db")
+            path = db_path
         logger.info("Initializing database.")
         self.conn = sqlite3.connect(path)
         self.cursor = self.conn.cursor()
@@ -68,23 +68,26 @@ class DataBaseEditor:
             bool: True if the activity was successfully inserted into the database,
                   False if the insertion failed.
         """
-        self.cursor.execute("INSERT INTO trainings "
-                            "(activity_id, "
-                            "start_date, "
-                            "sport_type, "
-                            "average_heartrate, "
-                            "average_speed, json_data) VALUES (?, ?, ?, ?, ?, ?)",
-                            (activity['id'], time_converter_from_iso(activity['start_date']),
-                             activity['sport_type'], activity['average_heartrate'], activity['average_speed'],
-                             json.dumps(data)))
-        self.conn.commit()
-        if self.cursor.lastrowid is not None:
-            logger.success("Successfully added activity to database.")
-            return True
-        else:
-            logger.warning("Activity not added to database.")
+        try:
+            self.cursor.execute("INSERT INTO trainings "
+                                "(activity_id, "
+                                "start_date, "
+                                "sport_type, "
+                                "average_heartrate, "
+                                "average_speed, json_data) VALUES (?, ?, ?, ?, ?, ?)",
+                                (activity['id'], time_converter_from_iso(activity['start_date']),
+                                 activity['sport_type'], activity['average_heartrate'], activity['average_speed'],
+                                 json.dumps(data)))
+            self.conn.commit()
+            if self.cursor.lastrowid is not None:
+                logger.success("Successfully added activity to database.")
+                return True
+            else:
+                logger.warning("Activity not added to database.")
+                return False
+        except KeyError as e:
+            logger.warning("Failed to add activity to database.", e)
             return False
-
     def clear_whole_database(self) -> bool:
         """
         Prompts the user for confirmation and deletes the entire 'trainings' table from the database if confirmed.

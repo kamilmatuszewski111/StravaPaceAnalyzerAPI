@@ -15,6 +15,8 @@ def mute_logger():
         yield
     finally:
         logger.enable("")
+
+
 activities_data = [
         (
                 {
@@ -41,17 +43,14 @@ activities_data = [
                 }
         )
     ]
+
 @pytest.fixture
 def test_db():
     temp_db = tempfile.NamedTemporaryFile(delete=False)
     path = temp_db.name
     temp_db.close()
 
-    class TestDB(DataBaseEditor):
-        def __init__(self):
-            super().__init__(path=path)
-
-    db = TestDB()
+    db = DataBaseEditor(path=path)
     yield db
 
     db.conn.close()
@@ -61,6 +60,7 @@ def test_db():
 def test_add_and_check_activity(test_db, activity, data):
     assert not test_db.check_if_data_exist(activity['id'])
     assert test_db.add_activity_to_db(activity, data)
+    assert not test_db.add_activity_to_db({'kupa': 0}, {'kupa': 0})
     assert test_db.check_if_data_exist(activity['id'])
 
 @pytest.mark.parametrize("activity, data",activities_data)
