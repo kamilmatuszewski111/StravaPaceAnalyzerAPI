@@ -102,14 +102,3 @@ def test_get_access_token__expired(mock_tokens):
         assert token == mock_tokens["ACCESS_TOKEN"]
         mock_is_expired.assert_called_once()
         mock_refresh_access_token.assert_called_once()
-
-# def test_save_tokens(mock_tokens, mock_new_data):
-#     tm = TokenManager()
-#     tm.env_file = "dummy.env"
-#
-#     m_open = mock_open()
-#
-#     with patch("builtins.open", m_open):
-#         tm._save_tokens(mock_new_data)
-#
-#     m_open.assert_called_once_with("dummy.env", "w")

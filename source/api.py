@@ -59,7 +59,7 @@ class StravaAPI:
         response = requests.get(
             ONE_ACTIVITY_TEMPLATE.format(activity_id),
             headers=headers,
-            params={"keys": "heartrate,velocity_smooth", "key_by_type": "true"}
+            params={"keys": "heartrate,velocity_smooth"}
         )
         if response.status_code == 200:
             return response.json()
