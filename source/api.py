@@ -33,7 +33,7 @@ class StravaAPI:
         response = requests.get(
             ACTIVITIES_URL,
             headers=headers,
-            params={"after": after, "before": before, "per_page": 99}
+            params={"after": after, "before": before, "per_page": 200}
         )
         if response.status_code == 200:
             logger.success("Successfully retrieved activities.")
@@ -63,6 +63,11 @@ class StravaAPI:
         )
         if response.status_code == 200:
             return response.json()
+        elif response.status_code == 429:
+            logger.error(f"Error fetching activity stream for {activity_id}: {response.status_code} - Too Many Requests")
+            logger.info("Already downloaded activities will be saved in your database. "
+                        "Please wait 15 minutes for more requests.")
+            return None
         else:
             logger.error(f"Error fetching activity stream for {activity_id}: {response.status_code}")
             return None

@@ -99,3 +99,16 @@ def test_read_data_in_time_range_negative(test_db, activity, data):
     assert not test_db.read_data_in_time_range('2025-Apr-15', '2025-05-03')
     assert not test_db.read_data_in_time_range('Monday', '2025-05-03')
     assert not test_db.read_data_in_time_range('2025-06-01', '2025-06-01')
+
+@pytest.mark.parametrize("activity, data",activities_data)
+def test_read_data_in_hr_range_positive(test_db, activity, data):
+    with mute_logger():
+        test_db.add_activity_to_db(activity, data)
+    assert test_db.read_data_in_hr_range('2025-05-31', '2025-06-03', 10, 180)
+
+@pytest.mark.parametrize("activity, data",activities_data)
+def test_read_data_in_hr_range_negative(test_db, activity, data):
+    with mute_logger():
+        test_db.add_activity_to_db(activity, data)
+    assert not test_db.read_data_in_hr_range('2025-05-31', '2025-06-03', 10, 130)
+    assert not test_db.read_data_in_hr_range('31 May 2025', '2025-06-03', 10, 180)

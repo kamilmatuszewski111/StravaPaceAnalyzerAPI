@@ -109,23 +109,27 @@ class DataBaseEditor:
             logger.warning("Deletion aborted.")
             return False
 
+    @staticmethod
+    def _prepare_dates(start_date, end_date):
+        if start_date == end_date:
+            logger.info("Please enter dates with at least two days in range.")
+            return []
+        return [f"{start_date} 00:00:00", f"{end_date} 23:59:59"]
+
     def read_data_in_time_range(self, start_date: str, end_date: str) -> Union[list, None]:
         """
         Retrieves all training records from the database that fall within the specified date range.
 
         Args:
-            start (str): The start date in the format 'YYYY-MM-DD'.
-            end (str): The end date in the format 'YYYY-MM-DD'.
+            start_date (str): The start date in the format 'YYYY-MM-DD'.
+            end_date (str): The end date in the format 'YYYY-MM-DD'.
 
         Returns:
             list: A list of tuples, each representing a training record within the given time range.
         """
-        if start_date == end_date:
-            logger.info("Please enter dates with at least two days in range.")
-            return []
-        start_date += " 00:00:00"
-        end_date += " 23:59:59"
+
         try:
+            start_date, end_date = self._prepare_dates(start_date, end_date)
             datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
             datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
             self.cursor.execute("SELECT * FROM trainings WHERE start_date BETWEEN ? AND ?", (start_date, end_date))
@@ -138,3 +142,24 @@ class DataBaseEditor:
         except ValueError:
             logger.error("Invalid start and/or end date.")
             return []
+
+    def read_data_in_hr_range(self, start_date: str, end_date: str,
+                              min_hr: Union[int, float] = 60, max_hr: Union[int, float] = 210) -> Union[list, None]:
+
+        start_date, end_date = self._prepare_dates(start_date, end_date)
+        try:
+            datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
+            datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
+            self.cursor.execute("SELECT * FROM trainings WHERE start_date BETWEEN ? AND ? "
+                                "AND average_heartrate BETWEEN ? AND ? ORDER BY start_date", (start_date, end_date, min_hr, max_hr))
+            data = self.cursor.fetchall()
+            if data:
+                return data
+            else:
+                logger.info("Thera are no records within the time range.")
+                return []
+        except ValueError:
+            logger.error("Invalid start and/or end date.")
+            return []
+
+

@@ -1,8 +1,6 @@
 import time
-
 from loguru import logger
-
-from common import DataAnalyzer
+from common import DataAnalyzer, Plot
 from source.api import StravaAPI
 from source.database import DataBaseEditor
 from source.token_manager import TokenManager
@@ -15,8 +13,8 @@ def main():
 
     logger.info("Create datetime params. Please put your start and end date.")
     time.sleep(0.5)
-    start_date = input("Start date in YYYY-MM-DD format")
-    end_date = input("End date in YYYY-MM-DD format")
+    start_date = "2024-01-01" # input("Start date in YYYY-MM-DD format")
+    end_date = "2025-08-10" # input("End date in YYYY-MM-DD format")
 
     activities = api.get_activities(start_date, end_date, "Run")
     if not activities:
@@ -29,8 +27,15 @@ def main():
             stream = api.get_activity_streams(act["id"])
             db.add_activity_to_db(act, stream)
 
-    data = db.read_data_in_time_range(start_date, end_date)
+    data = db.read_data_in_hr_range(start_date, end_date, 60, 155)
     data_analyzer = DataAnalyzer(data)
+    extracted_data = data_analyzer.extract_date_and_hr()
 
+
+    times = [DataAnalyzer.mmss_to_minutes(data[1]) for data in extracted_data]
+    dates = [data[0] for data in extracted_data]
+
+    plt = Plot(dates, times)
+    plt.show_plot()
 if __name__ == "__main__":
     main()
