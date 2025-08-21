@@ -1,5 +1,3 @@
-import os
-import tempfile
 from contextlib import contextmanager
 
 import pytest
@@ -45,16 +43,13 @@ activities_data = [
     ]
 
 @pytest.fixture
-def test_db():
-    temp_db = tempfile.NamedTemporaryFile(delete=False)
-    path = temp_db.name
-    temp_db.close()
+def test_db(tmp_path):
+    db_path = tmp_path / "test.db"
 
-    db = DataBaseEditor(path=path)
+    db = DataBaseEditor(path=str(db_path))
     yield db
 
     db.conn.close()
-    os.remove(path)
 
 @pytest.mark.parametrize("activity, data",activities_data)
 def test_add_and_check_activity(test_db, activity, data):
