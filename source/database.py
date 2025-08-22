@@ -18,7 +18,7 @@ class DataBaseEditor:
         logger.info("Initializing database.")
         self.conn = sqlite3.connect(path)
         self.cursor = self.conn.cursor()
-        self.cursor.execute(f'''
+        self.cursor.execute(f"""
         CREATE TABLE IF NOT EXISTS trainings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             activity_id INTEGER,
@@ -28,17 +28,17 @@ class DataBaseEditor:
             average_speed REAL,
             json_data TEXT
             )
-        ''')
+        """)
         self.conn.commit()
 
     def check_if_data_exist(self, activity_id: int) -> bool:
         """
-           Checks if a record with the given activity ID exists in the 'trainings' table.
-           Args:
-               activity_id (int): The ID of the activity to check.
-           Returns:
-               bool: True if the record exists, False otherwise.
-           """
+        Checks if a record with the given activity ID exists in the 'trainings' table.
+        Args:
+            activity_id (int): The ID of the activity to check.
+        Returns:
+            bool: True if the record exists, False otherwise.
+        """
         try:
             self.cursor.execute("SELECT 1 FROM trainings WHERE activity_id = ?", (activity_id,))
             is_exists = bool(self.cursor.fetchone())
@@ -69,15 +69,22 @@ class DataBaseEditor:
                   False if the insertion failed.
         """
         try:
-            self.cursor.execute("INSERT INTO trainings "
-                                "(activity_id, "
-                                "start_date, "
-                                "sport_type, "
-                                "average_heartrate, "
-                                "average_speed, json_data) VALUES (?, ?, ?, ?, ?, ?)",
-                                (activity['id'], time_converter_from_iso(activity['start_date']),
-                                 activity['sport_type'], activity['average_heartrate'], activity['average_speed'],
-                                 json.dumps(data)))
+            self.cursor.execute(
+                "INSERT INTO trainings "
+                "(activity_id, "
+                "start_date, "
+                "sport_type, "
+                "average_heartrate, "
+                "average_speed, json_data) VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    activity["id"],
+                    time_converter_from_iso(activity["start_date"]),
+                    activity["sport_type"],
+                    activity["average_heartrate"],
+                    activity["average_speed"],
+                    json.dumps(data),
+                ),
+            )
             self.conn.commit()
             if self.cursor.lastrowid is not None:
                 logger.success("Successfully added activity to database.")
@@ -88,6 +95,7 @@ class DataBaseEditor:
         except KeyError as e:
             logger.warning("Failed to add activity to database.", e)
             return False
+
     def clear_whole_database(self) -> bool:
         """
         Prompts the user for confirmation and deletes the entire 'trainings' table from the database if confirmed.
@@ -143,15 +151,18 @@ class DataBaseEditor:
             logger.error("Invalid start and/or end date.")
             return []
 
-    def read_data_in_hr_range(self, start_date: str, end_date: str,
-                              min_hr: Union[int, float] = 60, max_hr: Union[int, float] = 210) -> Union[list, None]:
-
+    def read_data_in_hr_range(
+        self, start_date: str, end_date: str, min_hr: Union[int, float] = 60, max_hr: Union[int, float] = 210
+    ) -> Union[list, None]:
         start_date, end_date = self._prepare_dates(start_date, end_date)
         try:
             datetime.strptime(start_date, "%Y-%m-%d %H:%M:%S")
             datetime.strptime(end_date, "%Y-%m-%d %H:%M:%S")
-            self.cursor.execute("SELECT * FROM trainings WHERE start_date BETWEEN ? AND ? "
-                                "AND average_heartrate BETWEEN ? AND ? ORDER BY start_date", (start_date, end_date, min_hr, max_hr))
+            self.cursor.execute(
+                "SELECT * FROM trainings WHERE start_date BETWEEN ? AND ? "
+                "AND average_heartrate BETWEEN ? AND ? ORDER BY start_date",
+                (start_date, end_date, min_hr, max_hr),
+            )
             data = self.cursor.fetchall()
             if data:
                 return data
@@ -161,5 +172,3 @@ class DataBaseEditor:
         except ValueError:
             logger.error("Invalid start and/or end date.")
             return []
-
-

@@ -9,6 +9,7 @@ class FitFileDecoder:
     """
     A class for decoding FIT files and extracting workout data.
     """
+
     def __init__(self, file_path):
         """
         Initializes the FIT file decoder.
@@ -97,7 +98,7 @@ class FitFileDecoder:
         self._extract_data()
 
         if "enhanced_speed" in self.expected_data:
-            self.dict_items["pace"] = [self.pace_calculate(x*3.6) for x in self.dict_items["enhanced_speed"]]
+            self.dict_items["pace"] = [self.pace_calculate(x * 3.6) for x in self.dict_items["enhanced_speed"]]
 
     def pace_within_limit(self):
         """
@@ -106,7 +107,7 @@ class FitFileDecoder:
         :return: A list of pace values as timedelta objects.
         """
         temp_pace = []
-        for pace, hr in zip(self.dict_items['pace'], self.dict_items['heart_rate']):
+        for pace, hr in zip(self.dict_items["pace"], self.dict_items["heart_rate"]):
             if self.low_hr_limit <= hr <= self.high_hr_limit:
                 temp_pace.append(pace)
         return temp_pace
@@ -128,11 +129,11 @@ class FitFileDecoder:
         av_min = int(average_pace.total_seconds() // 60)
         av_sec = int(average_pace.total_seconds() % 60)
 
-        self.training_date = self.messages["activity_mesgs"][0]['timestamp']
+        self.training_date = self.messages["activity_mesgs"][0]["timestamp"]
         formatted_date = self.training_date.strftime("%Y-%m-%d %H:%M:%S %Z")
         if av_min and av_sec:
             logger.success(f"Training date: {formatted_date}")
-            logger.success(f"Average pace within {self.low_hr_limit} - {self.high_hr_limit} -> "
-                           f"{av_min}:{round(av_sec, 2)}")
+            logger.success(
+                f"Average pace within {self.low_hr_limit} - {self.high_hr_limit} -> {av_min}:{round(av_sec, 2)}"
+            )
         return {self.training_date: average_pace}
-

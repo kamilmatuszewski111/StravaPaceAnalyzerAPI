@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 
 TOKEN_URL = "https://www.strava.com/oauth/token"
 
+
 class TokenManager:
     """
     Handles loading, saving, refreshing and validating Strava API tokens.
@@ -50,12 +51,15 @@ class TokenManager:
         Refresh the ACCESS_TOKEN using the REFRESH_TOKEN.
         """
         logger.info("Refreshing access token...")
-        response = requests.post(TOKEN_URL, data={
-            "client_id": self.tokens["CLIENT_ID"],
-            "client_secret": self.tokens["CLIENT_SECRET"],
-            "refresh_token": self.tokens["REFRESH_TOKEN"],
-            "grant_type": "refresh_token"
-        })
+        response = requests.post(
+            TOKEN_URL,
+            data={
+                "client_id": self.tokens["CLIENT_ID"],
+                "client_secret": self.tokens["CLIENT_SECRET"],
+                "refresh_token": self.tokens["REFRESH_TOKEN"],
+                "grant_type": "refresh_token",
+            },
+        )
 
         if response.status_code == HTTPStatus.OK:
             new_data = response.json()

@@ -8,7 +8,8 @@ from typing import Optional, Union, List
 from http import HTTPStatus
 
 ACTIVITIES_URL = "https://www.strava.com/api/v3/athlete/activities"
-ONE_ACTIVITY_TEMPLATE = 'https://www.strava.com/api/v3/activities/{}/streams'
+ONE_ACTIVITY_TEMPLATE = "https://www.strava.com/api/v3/activities/{}/streams"
+
 
 class StravaAPI:
     """
@@ -29,13 +30,11 @@ class StravaAPI:
         """
         logger.info(f"Getting {activity_types} activities from {start_date} to {end_date}")
         headers = {"Authorization": f"Bearer {self.token_manager.get_access_token()}"}
-        after = int(time.mktime(time.strptime(start_date, '%Y-%m-%d')))
-        before = int(time.mktime(time.strptime(end_date, '%Y-%m-%d')))
+        after = int(time.mktime(time.strptime(start_date, "%Y-%m-%d")))
+        before = int(time.mktime(time.strptime(end_date, "%Y-%m-%d")))
 
         response = requests.get(
-            ACTIVITIES_URL,
-            headers=headers,
-            params={"after": after, "before": before, "per_page": 200}
+            ACTIVITIES_URL, headers=headers, params={"after": after, "before": before, "per_page": 200}
         )
         if response.status_code == HTTPStatus.OK:
             logger.success("Successfully retrieved activities.")
@@ -59,17 +58,19 @@ class StravaAPI:
         logger.info(f"Getting stream data for activity {activity_id}")
         headers = {"Authorization": f"Bearer {self.token_manager.get_access_token()}"}
         response = requests.get(
-            ONE_ACTIVITY_TEMPLATE.format(activity_id),
-            headers=headers,
-            params={"keys": "heartrate,velocity_smooth"}
+            ONE_ACTIVITY_TEMPLATE.format(activity_id), headers=headers, params={"keys": "heartrate,velocity_smooth"}
         )
         if response.status_code == HTTPStatus.OK:
             return response.json()
         elif response.status_code == HTTPStatus.TOO_MANY_REQUESTS:
-            logger.error(f"Error fetching activity stream for {activity_id}: {response.status_code} - "
-                         f"{HTTPStatus.TOO_MANY_REQUESTS.description}")
-            logger.info("Already downloaded activities will be saved in your database. "
-                        "Please wait 15 minutes for more requests.")
+            logger.error(
+                f"Error fetching activity stream for {activity_id}: {response.status_code} - "
+                f"{HTTPStatus.TOO_MANY_REQUESTS.description}"
+            )
+            logger.info(
+                "Already downloaded activities will be saved in your database. "
+                "Please wait 15 minutes for more requests."
+            )
             return None
         else:
             logger.error(f"Error fetching activity stream for {activity_id}: {HTTPStatus(response.status_code)}")
