@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -19,7 +20,7 @@ def test_get_activities_pass(mock_get, token_manager_mock):
         {"id": 3, "sport_type": "Squash"},
     ]
     mock_response = MagicMock()
-    mock_response.status_code = 200
+    mock_response.status_code = HTTPStatus.OK.value
     mock_response.json.return_value = fake_activities
     mock_get.return_value = mock_response
 
@@ -37,8 +38,8 @@ def test_get_activities_pass(mock_get, token_manager_mock):
 @patch("source.api.requests.get")
 def test_get_activities_fail(mock_get, token_manager_mock):
     mock_response = MagicMock()
-    mock_response.status_code = 500
-    mock_response.text = "Server error"
+    mock_response.status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
+    mock_response.text = HTTPStatus.INTERNAL_SERVER_ERROR.name
     mock_get.return_value = mock_response
 
     api = StravaAPI(token_manager_mock)
@@ -51,7 +52,7 @@ def test_get_activity_streams_pass(mock_get, token_manager_mock):
     fake_stream_data = {"heartrate": [100, 110], "velocity_smooth": [5, 5.5]}
 
     mock_response = MagicMock()
-    mock_response.status_code = 200
+    mock_response.status_code = HTTPStatus.OK.value
     mock_response.json.return_value = fake_stream_data
     mock_get.return_value = mock_response
 
@@ -62,7 +63,7 @@ def test_get_activity_streams_pass(mock_get, token_manager_mock):
 @patch("source.api.requests.get")
 def test_get_activity_streams_fail(mock_get, token_manager_mock):
     mock_response = MagicMock()
-    mock_response.status_code = 404
+    mock_response.status_code = HTTPStatus.NOT_FOUND.value
     mock_get.return_value = mock_response
 
     api = StravaAPI(token_manager_mock)

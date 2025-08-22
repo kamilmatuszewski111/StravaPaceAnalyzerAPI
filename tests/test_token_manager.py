@@ -1,5 +1,6 @@
 import os
 import tempfile
+from http import HTTPStatus
 from unittest.mock import patch, MagicMock, mock_open
 
 import pytest
@@ -50,7 +51,7 @@ def test_refresh_access_token_pass(mock_tokens, mock_new_data):
     tm.tokens = mock_tokens
 
     mock_response = MagicMock()
-    mock_response.status_code = 200
+    mock_response.status_code = HTTPStatus.OK.value
     mock_response.json.return_value = mock_new_data
 
     with patch("requests.post", return_value=mock_response) as mock_post, \
@@ -72,8 +73,8 @@ def test_refresh_access_token_fail(mock_tokens):
     tm.tokens = mock_tokens
 
     mock_response = MagicMock()
-    mock_response.status_code = 400
-    mock_response.text = "Bad Request"
+    mock_response.status_code = HTTPStatus.BAD_REQUEST.value
+    mock_response.text = HTTPStatus.BAD_REQUEST.name
 
     with patch("requests.post", return_value=mock_response):
         with pytest.raises(Exception, match="Unable to refresh access token."):
