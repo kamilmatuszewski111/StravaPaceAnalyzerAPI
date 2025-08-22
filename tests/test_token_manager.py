@@ -1,12 +1,9 @@
-import os
-import tempfile
 from http import HTTPStatus
-from unittest.mock import patch, MagicMock, mock_open
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from source.token_manager import TokenManager
-from source.token_manager import TOKEN_URL
+from source.token_manager import TOKEN_URL, TokenManager
 
 
 @pytest.fixture

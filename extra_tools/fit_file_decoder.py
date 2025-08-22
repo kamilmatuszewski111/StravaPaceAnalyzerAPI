@@ -1,8 +1,9 @@
 import os
-from loguru import logger
-from garmin_fit_sdk import Decoder, Stream
 from collections import defaultdict
 from datetime import timedelta
+
+from garmin_fit_sdk import Decoder, Stream
+from loguru import logger
 
 
 class FitFileDecoder:

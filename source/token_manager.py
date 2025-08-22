@@ -1,10 +1,10 @@
+import os
+import time
 from http import HTTPStatus
 
 import requests
-import time
-from loguru import logger
-import os
 from dotenv import load_dotenv
+from loguru import logger
 
 TOKEN_URL = "https://www.strava.com/oauth/token"
 

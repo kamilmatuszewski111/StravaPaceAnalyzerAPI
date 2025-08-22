@@ -1,10 +1,10 @@
 import json
+import os
 import sqlite3
 from datetime import datetime
 from typing import Union
 
 from loguru import logger
-import os
 
 from source.common import time_converter_from_iso
 
@@ -18,7 +18,7 @@ class DataBaseEditor:
         logger.info("Initializing database.")
         self.conn = sqlite3.connect(path)
         self.cursor = self.conn.cursor()
-        self.cursor.execute(f"""
+        self.cursor.execute("""
         CREATE TABLE IF NOT EXISTS trainings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             activity_id INTEGER,

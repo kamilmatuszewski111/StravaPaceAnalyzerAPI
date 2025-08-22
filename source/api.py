@@ -1,11 +1,11 @@
 import time
+from http import HTTPStatus
+from typing import List, Optional, Union
 
 import requests
 from loguru import logger
-from datetime import datetime
+
 from source.token_manager import TokenManager
-from typing import Optional, Union, List
-from http import HTTPStatus
 
 ACTIVITIES_URL = "https://www.strava.com/api/v3/athlete/activities"
 ONE_ACTIVITY_TEMPLATE = "https://www.strava.com/api/v3/activities/{}/streams"

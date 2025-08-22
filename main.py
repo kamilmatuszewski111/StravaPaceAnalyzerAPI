@@ -1,6 +1,8 @@
 import time
-from loguru import logger
+
 from common import DataAnalyzer, Plot
+from loguru import logger
+
 from source.api import StravaAPI
 from source.database import DataBaseEditor
 from source.token_manager import TokenManager
