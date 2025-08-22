@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import requests
 import time
 from loguru import logger
@@ -55,7 +57,7 @@ class TokenManager:
             "grant_type": "refresh_token"
         })
 
-        if response.status_code == 200:
+        if response.status_code == HTTPStatus.OK:
             new_data = response.json()
             new_data["CLIENT_ID"] = self.tokens["CLIENT_ID"]
             new_data["CLIENT_SECRET"] = self.tokens["CLIENT_SECRET"]
