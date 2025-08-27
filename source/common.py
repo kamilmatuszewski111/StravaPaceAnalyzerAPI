@@ -1,9 +1,9 @@
 from datetime import datetime
-
-from matplotlib import pyplot as plt
+import matplotlib
+matplotlib.use("Qt5Agg")
+import matplotlib.pyplot as plt
 
 from extra_tools.fit_file_decoder import FitFileDecoder as fit_decoder
-
 
 def time_converter_from_iso(date_time):
     dt = datetime.fromisoformat(date_time.replace("Z", "+00:00"))

@@ -15,8 +15,8 @@ def main():
 
     logger.info("Create datetime params. Please put your start and end date.")
     time.sleep(0.5)
-    start_date = "2024-01-01"  # input("Start date in YYYY-MM-DD format")
-    end_date = "2025-08-10"  # input("End date in YYYY-MM-DD format")
+    start_date = input("Start date in YYYY-MM-DD format")
+    end_date = input("End date in YYYY-MM-DD format")
 
     activities = api.get_activities(start_date, end_date, "Run")
     if not activities:
